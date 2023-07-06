@@ -1,0 +1,10 @@
+*.code-workspace
+.DS_Store
+**/__pycache__/*
+.env
+.yfinance.cache
+.ipynb_checkpoints
+.gcreds.json
+*.parquet
+snapshot/*
+venv/*
