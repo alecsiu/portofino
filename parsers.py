@@ -52,7 +52,7 @@ def parse_fidelity(f):
     def _infer_security_type(description):
         if description.startswith('UNITED STATES TREAS'):
             return 'Treasury'
-        elif 'MONEY MARKET' in description:
+        elif 'MONEY MARKET' in description or 'CASH RESERVES' in description:
             return 'Money Market'
         elif description.startswith('FDIC-INSURED DEPOSIT SWEEP'):
             return 'Cash'
