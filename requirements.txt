@@ -281,6 +281,8 @@ pygments==2.15.1
     #   rich
 pympler==1.0.1
     # via streamlit
+pyparsing==3.1.0
+    # via -r requirements.in
 pyrsistent==0.19.3
     # via jsonschema
 python-dateutil==2.8.2
@@ -352,7 +354,7 @@ soupsieve==2.4.1
     # via beautifulsoup4
 stack-data==0.6.2
     # via ipython
-streamlit==1.24.0
+streamlit==1.24.1
     # via -r requirements.in
 tenacity==8.2.2
     # via

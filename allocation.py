@@ -48,14 +48,23 @@ class Allocation:
         for child in self.children.values():
             errors.extend(child.validate_weights())
         return errors
-    
-    def collect_weights(self):
-        if not self.children:
+
+    def collect_weights(self, max_depth, current_depth):
+        if not self.children or current_depth == max_depth:
             return [(self.name, self.weight)]
         weights = []
         for child in self.children.values():
-            weights.extend([(ticker, self.weight * weight) for ticker, weight in child.collect_weights()])
+            weights.extend([(ticker, self.weight * weight) for ticker, weight in child.collect_weights(max_depth, current_depth + 1)])
         return weights
+    
+    def get_ticker_weights(self):
+        return [(ticker, weight) for ticker, weight in self.collect_weights(2, 0)]
+    
+    def get_asset_class_weights(self):
+        return [(asset_class, weight) for asset_class, weight in self.collect_weights(1, 0)]
+    
+    def get_asset_class_mapping(self):
+        return {leaf.name: leaf.parent.name for leaf in self.collect_leaves()}
     
     def collect_leaves(self):
         if not self.children:
@@ -66,7 +75,7 @@ class Allocation:
         return leaves
     
     def to_df(self):
-        weights = {w[0]: w[1] for w in self.collect_weights()}
+        weights = {w[0]: w[1] for w in self.collect_weights(2, 0)}
         return pd.DataFrame([(leaf.parent.name, leaf.name, weights[leaf.name]) for leaf in self.collect_leaves()], columns=['category', 'ticker', 'weight'])
         
 
@@ -77,14 +86,16 @@ def create_global_allocation():
     global_allocation << Allocation('US Bonds', 0.25)
     global_allocation << Allocation('EM Equities', 0.07)
     global_allocation << Allocation('US Real Estate', 0.05)
-
-    global_allocation >> 'US Equities' << Allocation('ITOT', 0.46)
-    global_allocation >> 'US Equities' << Allocation('AVUV', 0.18)
-    global_allocation >> 'US Equities' << Allocation('AVLV', 0.06)
-    global_allocation >> 'US Equities' << Allocation('QQQM', 0.18)
-    global_allocation >> 'US Equities' << Allocation('DUHP', 0.06)
-    global_allocation >> 'US Equities' << Allocation('COWZ', 0.06)
     
+    global_allocation >> 'US Equities' << Allocation('ITOT', 0.5)
+    global_allocation >> 'US Equities' << Allocation('AVUV', 0.18)
+    global_allocation >> 'US Equities' << Allocation('QQQM', 0.18)
+    global_allocation >> 'US Equities' << Allocation('DUHP', 0.07)
+    global_allocation >> 'US Equities' << Allocation('COWZ', 0.07)
+    global_allocation >> 'US Equities' << Allocation('QQQJ', 0)
+    global_allocation >> 'US Equities' << Allocation('RPV', 0)
+    global_allocation >> 'US Equities' << Allocation('SCHD', 0)
+        
     global_allocation >> 'Intl Equities' << Allocation('VEA', 0.60)
     global_allocation >> 'Intl Equities' << Allocation('AVDV', 0.20)
     global_allocation >> 'Intl Equities' << Allocation('DFIV', 0.20)
@@ -105,16 +116,16 @@ def create_global_allocation():
 
 
 def analyze_allocation(
-        holdings_df, key: str, allocations: List[Tuple[str, float]], cash_to_invest: float = 0.0
+        holdings_df, key: str, key_weights: List[Tuple[str, float]], cash_to_invest: float = 0.0
     ):
     result_df = holdings_df[[key, 'current_value']].groupby([key]).sum()
     investable = result_df['current_value'].sum() + cash_to_invest
     result_df['current_alloc'] = result_df['current_value'] / investable
-    alloc_sum = sum(percent for _, percent in allocations)
+    alloc_sum = sum(percent for _, percent in key_weights)
     if not math.isclose(alloc_sum, 1):
         raise ValueError(f'Allocations must sum to 1.0, current allocation = {alloc_sum}')
     desired_allocation_df = pd.DataFrame.from_records([
-        {key: category, 'target_alloc': allocation} for category, allocation in allocations
+        {key: category, 'target_alloc': allocation} for category, allocation in key_weights
     ]).set_index(key)
     result_df = result_df.merge(desired_allocation_df, how='outer', on=key).fillna(0)
     result_df['target_pct'] = result_df['target_alloc'] * 100.0
