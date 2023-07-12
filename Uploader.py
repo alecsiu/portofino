@@ -11,7 +11,7 @@ from allocation import create_global_allocation, analyze_allocation
 from parsers import FidelityParser, SchwabParser, VanguardParser
 
 
-st.set_page_config(page_title='Fidelity Uploader', page_icon='📊', layout='wide')
+st.set_page_config(page_title='Portfolio Uploader', page_icon='📊', layout='wide')
 st.title('Asset Allocation Analyzer')
 
 with st.expander('Adjust Allocation Targets', expanded=False):
@@ -97,10 +97,7 @@ if holdings_df is not None and not holdings_df.empty:
     cash_to_invest = st.number_input('Additional cash to invest')
 
     def visualize_drift(key, weights, cash_to_invest, title):
-        alloc_df = analyze_allocation(source_df, key, weights,
-            cash_to_invest=cash_to_invest,
-        )
-
+        alloc_df = analyze_allocation(source_df, key, weights, cash_to_invest=cash_to_invest)
         alloc_plot_df = alloc_df[(alloc_df['target_pct'] > 0) | (alloc_df['current_value'] > 0)].reset_index()
         fig1 = px.bar(
             alloc_plot_df.sort_values(by=['current_value']),
@@ -125,6 +122,7 @@ if holdings_df is not None and not holdings_df.empty:
         alloc_cols = st.columns(2)
         alloc_cols[0].plotly_chart(fig1, use_container_width=True)
         alloc_cols[1].plotly_chart(fig2, use_container_width=True)
+        return alloc_df
 
     visualize_drift('ticker', target_allocation.get_ticker_weights(), cash_to_invest, 'Ticker')
     visualize_drift('asset_class', target_allocation.get_asset_class_weights(), cash_to_invest, 'Asset Class')
@@ -133,6 +131,10 @@ if holdings_df is not None and not holdings_df.empty:
     fig = px.bar(agg_df, x='ticker', y='current_value', text_auto='.2s', title='Tickers')
     fig.update_layout(yaxis=dict(tickformat='$,d', fixedrange=True))
     fig.update_xaxes(fixedrange=True)
+    st.plotly_chart(fig, use_container_width=True)
+
+    fig = px.sunburst(source_df, path=['asset_class', 'ticker'], values='current_value', title='Asset Class')
+    fig.update_traces(textinfo='label+percent entry')
     st.plotly_chart(fig, use_container_width=True)
 
     st.download_button(
