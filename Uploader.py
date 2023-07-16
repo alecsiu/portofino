@@ -70,21 +70,19 @@ if holdings_df is not None and not holdings_df.empty:
     # Fix current value for Money Market, Cash and CDs
     mask = holdings_df['security_type'].isin(['Money Market', 'Cash', 'CD', 'Treasury'])
     holdings_df.loc[mask, 'current_value'] = holdings_df[mask]['quantity']
+    mask = holdings_df['security_type'].isin(['CD', 'Treasury'])
+    holdings_df.loc[mask, 'ticker'] = 'CD / Treasury'
 
     # Portfolio to be rebalanced
     list(target_allocation.to_df()['ticker'].unique())
-    source_df = pd.concat([
-        holdings_df[
-            holdings_df['ticker'].isin(list(target_allocation.to_df()['ticker'].unique()))
-        ],
-        holdings_df[
-            holdings_df['security_type'].isin(['CD', 'Treasury'])
-        ].assign(ticker='CD / Treasury'),
-    ])
+    source_df = holdings_df[
+        holdings_df['ticker'].isin(list(target_allocation.to_df()['ticker'].unique()))
+    ].copy()
 
     # Assign an asset class to each position
     asset_class_mapping = target_allocation.get_asset_class_mapping()
-    source_df['asset_class'] = source_df['ticker'].apply(lambda ticker: asset_class_mapping.get(ticker, 'Other'))
+    source_df['asset_class'] = source_df['ticker'].apply(lambda ticker: asset_class_mapping.get(ticker, 'US Equities'))
+    holdings_df['asset_class'] = holdings_df['ticker'].apply(lambda ticker: asset_class_mapping.get(ticker, 'US Equities'))
 
     summary_cols = st.columns(6)
     summary_cols[0].metric('Total Portfolio', f'${holdings_df["current_value"].sum():,.0f}')
@@ -133,9 +131,13 @@ if holdings_df is not None and not holdings_df.empty:
     fig.update_xaxes(fixedrange=True)
     st.plotly_chart(fig, use_container_width=True)
 
-    fig = px.sunburst(source_df, path=['asset_class', 'ticker'], values='current_value', title='Asset Class')
+    sunburst_cols = st.columns(2)
+    fig = px.sunburst(source_df, path=['asset_class', 'ticker'], values='current_value', title='Core Asset Allocation')
     fig.update_traces(textinfo='label+percent entry')
-    st.plotly_chart(fig, use_container_width=True)
+    sunburst_cols[0].plotly_chart(fig, use_container_width=True)
+    fig = px.sunburst(holdings_df, path=['asset_class', 'ticker'], values='current_value', title='Global Asset Allocation')
+    fig.update_traces(textinfo='label+percent entry')
+    sunburst_cols[1].plotly_chart(fig, use_container_width=True)
 
     st.download_button(
         'Download aggregated holdings as CSV',
