@@ -76,16 +76,20 @@ class Allocation:
     
     def to_df(self):
         weights = {w[0]: w[1] for w in self.collect_weights(2, 0)}
-        return pd.DataFrame([(leaf.parent.name, leaf.name, weights[leaf.name]) for leaf in self.collect_leaves()], columns=['category', 'ticker', 'weight'])
+        return pd.DataFrame(
+            [(leaf.parent.name, leaf.name, weights[leaf.name]) for leaf in self.collect_leaves()],
+            columns=['category', 'ticker', 'weight'],
+        )
         
 
 def create_global_allocation():
     global_allocation = Allocation('Global', 1.0)
     global_allocation << Allocation('US Equities', 0.42)
     global_allocation << Allocation('Intl Equities', 0.21)
-    global_allocation << Allocation('US Bonds', 0.25)
-    global_allocation << Allocation('EM Equities', 0.07)
+    global_allocation << Allocation('US Bonds', 0.21)
+    global_allocation << Allocation('EM Equities', 0.06)
     global_allocation << Allocation('US Real Estate', 0.05)
+    global_allocation << Allocation('Short-Term', 0.05)
     
     global_allocation >> 'US Equities' << Allocation('ITOT', 0.48)
     global_allocation >> 'US Equities' << Allocation('AVUV', 0.18)
@@ -93,25 +97,29 @@ def create_global_allocation():
     global_allocation >> 'US Equities' << Allocation('COWZ', 0.08)
     global_allocation >> 'US Equities' << Allocation('SCHD', 0.08)
     global_allocation >> 'US Equities' << Allocation('QQQJ', 0)
-    global_allocation >> 'US Equities' << Allocation('RPV', 0)
-    global_allocation >> 'US Equities' << Allocation('DUHP', 0)
         
     global_allocation >> 'Intl Equities' << Allocation('VEA', 0.60)
     global_allocation >> 'Intl Equities' << Allocation('AVDV', 0.20)
     global_allocation >> 'Intl Equities' << Allocation('DFIV', 0.20)
 
-    global_allocation >> 'EM Equities' << Allocation('SPEM', 0.25)
-    global_allocation >> 'EM Equities' << Allocation('FRDM', 0.25)
-    global_allocation >> 'EM Equities' << Allocation('AVES', 0.5)
-    global_allocation >> 'EM Equities' << Allocation('VWO', 0)
+    global_allocation >> 'EM Equities' << Allocation('SPEM', 0.4)
+    global_allocation >> 'EM Equities' << Allocation('AVES', 0.4)
+    global_allocation >> 'EM Equities' << Allocation('FRDM', 0.2)
 
-    global_allocation >> 'US Bonds' << Allocation('VTEB', 0.30)
-    global_allocation >> 'US Bonds' << Allocation('VWALX', 0.10)
-    global_allocation >> 'US Bonds' << Allocation('TBIL', 0.20)
-    global_allocation >> 'US Bonds' << Allocation('CD / Treasury', 0.25)
-    global_allocation >> 'US Bonds' << Allocation('IBDP', 0.05) # corporate bond ladder
+    global_allocation >> 'US Bonds' << Allocation('VTEB', 0.22)
+    global_allocation >> 'US Bonds' << Allocation('VWIUX', 0.22)
+    global_allocation >> 'US Bonds' << Allocation('VWALX', 0.11)
+    global_allocation >> 'US Bonds' << Allocation('IBDP', 0.05)  # 4-year corp bond ladder
     global_allocation >> 'US Bonds' << Allocation('IBDQ', 0.05)
     global_allocation >> 'US Bonds' << Allocation('IBDR', 0.05)
+    global_allocation >> 'US Bonds' << Allocation('IBDS', 0.05)
+    global_allocation >> 'US Bonds' << Allocation('Treasury', 0.25)
+
+    global_allocation >> 'Short-Term' << Allocation('CD', 0.1)
+    global_allocation >> 'Short-Term' << Allocation('TFLO', 0.6)
+    global_allocation >> 'Short-Term' << Allocation('FLOT', 0.3)
+    global_allocation >> 'Short-Term' << Allocation('TBIL', 0)
+    global_allocation >> 'Short-Term' << Allocation('Money Market', 0)
 
     global_allocation >> 'US Real Estate' << Allocation('VGSLX', 0.5)
     global_allocation >> 'US Real Estate' << Allocation('AVRE', 0.5)

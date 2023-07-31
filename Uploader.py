@@ -70,8 +70,7 @@ if holdings_df is not None and not holdings_df.empty:
     # Fix current value for Money Market, Cash and CDs
     mask = holdings_df['security_type'].isin(['Money Market', 'Cash', 'CD', 'Treasury'])
     holdings_df.loc[mask, 'current_value'] = holdings_df[mask]['quantity']
-    mask = holdings_df['security_type'].isin(['CD', 'Treasury'])
-    holdings_df.loc[mask, 'ticker'] = 'CD / Treasury'
+    holdings_df.loc[mask, 'ticker'] = holdings_df[mask]['security_type']
 
     # Portfolio to be rebalanced
     list(target_allocation.to_df()['ticker'].unique())
@@ -138,6 +137,9 @@ if holdings_df is not None and not holdings_df.empty:
     fig = px.sunburst(holdings_df, path=['asset_class', 'ticker'], values='current_value', title='Global Asset Allocation')
     fig.update_traces(textinfo='label+percent entry')
     sunburst_cols[1].plotly_chart(fig, use_container_width=True)
+
+    cd_treasuries_df = holdings_df[holdings_df['security_type'].isin(['CD', 'Treasury'])]
+    st.dataframe(cd_treasuries_df[['ticker', 'account_name', 'description', 'maturity_date', 'current_value']].sort_values(by='maturity_date').reset_index(drop=True), hide_index=True)
 
     st.download_button(
         'Download aggregated holdings as CSV',
