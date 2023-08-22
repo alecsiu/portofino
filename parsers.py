@@ -18,7 +18,7 @@ class Parser:
                 return 'Money Market'
             elif description.startswith('FDIC-INSURED DEPOSIT SWEEP'):
                 return 'Cash'
-            elif re.search(r'CD \d\.\d+%', description) is not None:
+            elif re.search(r'CD (\d\.\d+%|FDIC)', description) is not None:
                 return 'CD'
             else:
                 return 'Security'

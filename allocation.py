@@ -5,11 +5,10 @@ from typing import List, Tuple
 import pandas as pd
 
 
-class Allocation:
-    
-    def __init__(self, name, weight):
+class AssetClass:
+
+    def __init__(self, name):
         self.name = name
-        self.weight = weight
         self.children = {}  # ordered dict
         self.parent = None
 
@@ -25,7 +24,7 @@ class Allocation:
         return self.children[other]
     
     def __str__(self) -> str:
-        s = f'{self.name} x {self.weight}'
+        s = self.name
         if self.children:
             s += f' → [{" + ".join(str(c) for c in self.children.values())}]'
         return s
@@ -37,7 +36,40 @@ class Allocation:
             s = f'{parent.name} → {s}'
             parent = parent.parent
         return s
+    
+    def hierarchy(self):
+        h = []
+        parent = self.parent
+        while parent:
+            h.append(parent.name)
+            parent = parent.parent
+        h.reverse()
+        return h
 
+    def search(self, name):
+        if self.name == name:
+            return self        
+        if not self.children:
+            return None
+        for child in self.children.values():
+            found_node = child.search(name)
+            if found_node:
+                return found_node
+        return None
+
+
+class Allocation(AssetClass):
+    
+    def __init__(self, name, weight):
+        super().__init__(name)
+        self.weight = weight
+
+    def __str__(self) -> str:
+        s = f'{self.name} x {self.weight}'
+        if self.children:
+            s += f' → [{" + ".join(str(c) for c in self.children.values())}]'
+        return s
+    
     def validate_weights(self):
         if not self.children:
             return []
@@ -62,10 +94,7 @@ class Allocation:
     
     def get_asset_class_weights(self):
         return [(asset_class, weight) for asset_class, weight in self.collect_weights(1, 0)]
-    
-    def get_asset_class_mapping(self):
-        return {leaf.name: leaf.parent.name for leaf in self.collect_leaves()}
-    
+        
     def collect_leaves(self):
         if not self.children:
             return [self]
@@ -80,44 +109,92 @@ class Allocation:
             [(leaf.parent.name, leaf.name, weights[leaf.name]) for leaf in self.collect_leaves()],
             columns=['category', 'ticker', 'weight'],
         )
-        
+
+
+asset_classes = AssetClass('Global')
+asset_classes << AssetClass('US Equities')
+asset_classes << AssetClass('Intl Equities')
+asset_classes << AssetClass('EM Equities')
+asset_classes << AssetClass('US Bonds')
+asset_classes << AssetClass('Short-Term')
+asset_classes << AssetClass('US Real Estate')
+
+asset_classes >> 'US Equities' << AssetClass('ITOT')
+asset_classes >> 'US Equities' << AssetClass('AVUV')
+asset_classes >> 'US Equities' << AssetClass('QQQM')
+asset_classes >> 'US Equities' << AssetClass('COWZ')
+asset_classes >> 'US Equities' << AssetClass('SCHD')
+asset_classes >> 'US Equities' << AssetClass('QQQJ')
+asset_classes >> 'US Equities' << AssetClass('SPGP')
+asset_classes >> 'US Equities' << AssetClass('OMFL')
+
+asset_classes >> 'Intl Equities' << AssetClass('VEA')
+asset_classes >> 'Intl Equities' << AssetClass('DXJ')
+asset_classes >> 'Intl Equities' << AssetClass('HEFA')
+asset_classes >> 'Intl Equities' << AssetClass('AVDV')
+asset_classes >> 'Intl Equities' << AssetClass('DFIV')
+
+asset_classes >> 'EM Equities' << AssetClass('SPEM')
+asset_classes >> 'EM Equities' << AssetClass('AVES')
+asset_classes >> 'EM Equities' << AssetClass('XCEM')
+
+asset_classes >> 'US Bonds' << AssetClass('VTEB')
+asset_classes >> 'US Bonds' << AssetClass('VWIUX')
+asset_classes >> 'US Bonds' << AssetClass('VWALX')
+asset_classes >> 'US Bonds' << AssetClass('BND')
+asset_classes >> 'US Bonds' << AssetClass('FBND')
+asset_classes >> 'US Bonds' << AssetClass('JAAA')
+asset_classes >> 'US Bonds' << AssetClass('CLOA')
+asset_classes >> 'US Bonds' << AssetClass('CD')
+asset_classes >> 'US Bonds' << AssetClass('Treasury')
+
+asset_classes >> 'Short-Term' << AssetClass('TFLO')
+asset_classes >> 'Short-Term' << AssetClass('FLOT')
+asset_classes >> 'Short-Term' << AssetClass('JMST')
+asset_classes >> 'Short-Term' << AssetClass('TBIL')
+asset_classes >> 'Short-Term' << AssetClass('Money Market')
+
+asset_classes >> 'US Real Estate' << AssetClass('VGSLX')
+asset_classes >> 'US Real Estate' << AssetClass('AVRE')
+
 
 def create_global_allocation():
     global_allocation = Allocation('Global', 1.0)
     global_allocation << Allocation('US Equities', 0.42)
     global_allocation << Allocation('Intl Equities', 0.21)
-    global_allocation << Allocation('US Bonds', 0.21)
+    global_allocation << Allocation('US Bonds', 0.2)
     global_allocation << Allocation('EM Equities', 0.06)
     global_allocation << Allocation('US Real Estate', 0.05)
-    global_allocation << Allocation('Short-Term', 0.05)
+    global_allocation << Allocation('Short-Term', 0.06)
     
-    global_allocation >> 'US Equities' << Allocation('ITOT', 0.48)
+    global_allocation >> 'US Equities' << Allocation('ITOT', 0.4)
     global_allocation >> 'US Equities' << Allocation('AVUV', 0.18)
     global_allocation >> 'US Equities' << Allocation('QQQM', 0.18)
     global_allocation >> 'US Equities' << Allocation('COWZ', 0.08)
     global_allocation >> 'US Equities' << Allocation('SCHD', 0.08)
+    global_allocation >> 'US Equities' << Allocation('SPGP', 0.04)
+    global_allocation >> 'US Equities' << Allocation('OMFL', 0.04)
     global_allocation >> 'US Equities' << Allocation('QQQJ', 0)
         
-    global_allocation >> 'Intl Equities' << Allocation('VEA', 0.60)
+    global_allocation >> 'Intl Equities' << Allocation('VEA', 0.45)
+    global_allocation >> 'Intl Equities' << Allocation('DXJ', 0.05)
+    global_allocation >> 'Intl Equities' << Allocation('HEFA', 0.1)
     global_allocation >> 'Intl Equities' << Allocation('AVDV', 0.20)
     global_allocation >> 'Intl Equities' << Allocation('DFIV', 0.20)
 
     global_allocation >> 'EM Equities' << Allocation('SPEM', 0.4)
     global_allocation >> 'EM Equities' << Allocation('AVES', 0.4)
-    global_allocation >> 'EM Equities' << Allocation('FRDM', 0.2)
+    global_allocation >> 'EM Equities' << Allocation('XCEM', 0.2)
 
-    global_allocation >> 'US Bonds' << Allocation('VTEB', 0.22)
+    global_allocation >> 'US Bonds' << Allocation('VTEB', 0.42)
     global_allocation >> 'US Bonds' << Allocation('VWIUX', 0.22)
     global_allocation >> 'US Bonds' << Allocation('VWALX', 0.11)
-    global_allocation >> 'US Bonds' << Allocation('IBDP', 0.05)  # 4-year corp bond ladder
-    global_allocation >> 'US Bonds' << Allocation('IBDQ', 0.05)
-    global_allocation >> 'US Bonds' << Allocation('IBDR', 0.05)
-    global_allocation >> 'US Bonds' << Allocation('IBDS', 0.05)
-    global_allocation >> 'US Bonds' << Allocation('Treasury', 0.25)
+    global_allocation >> 'US Bonds' << Allocation('Treasury', 0.15)
+    global_allocation >> 'US Bonds' << Allocation('CD', 0.1)
 
-    global_allocation >> 'Short-Term' << Allocation('CD', 0.1)
-    global_allocation >> 'Short-Term' << Allocation('TFLO', 0.6)
-    global_allocation >> 'Short-Term' << Allocation('FLOT', 0.3)
+    global_allocation >> 'Short-Term' << Allocation('TFLO', 0.5)
+    global_allocation >> 'Short-Term' << Allocation('FLOT', 0.25)
+    global_allocation >> 'Short-Term' << Allocation('JMST', 0.25)  
     global_allocation >> 'Short-Term' << Allocation('TBIL', 0)
     global_allocation >> 'Short-Term' << Allocation('Money Market', 0)
 

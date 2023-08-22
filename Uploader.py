@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.express as px
 import yfinance_apis as yf
 
-from allocation import create_global_allocation, analyze_allocation
+from allocation import create_global_allocation, analyze_allocation, asset_classes
 from parsers import FidelityParser, SchwabParser, VanguardParser
 
 
@@ -79,9 +79,12 @@ if holdings_df is not None and not holdings_df.empty:
     ].copy()
 
     # Assign an asset class to each position
-    asset_class_mapping = target_allocation.get_asset_class_mapping()
-    source_df['asset_class'] = source_df['ticker'].apply(lambda ticker: asset_class_mapping.get(ticker, 'US Equities'))
-    holdings_df['asset_class'] = holdings_df['ticker'].apply(lambda ticker: asset_class_mapping.get(ticker, 'US Equities'))
+    def get_asset_class(ticker):
+        asset_class = asset_classes.search(ticker)
+        return asset_class.hierarchy()[1] if asset_class else 'Unknown'
+
+    source_df['asset_class'] = source_df['ticker'].apply(get_asset_class)
+    holdings_df['asset_class'] = holdings_df['ticker'].apply(get_asset_class)
 
     summary_cols = st.columns(6)
     summary_cols[0].metric('Total Portfolio', f'${holdings_df["current_value"].sum():,.0f}')
@@ -143,7 +146,7 @@ if holdings_df is not None and not holdings_df.empty:
 
     st.download_button(
         'Download aggregated holdings as CSV',
-        data=holdings_df[['ticker', 'quantity', 'cost_basis']].groupby('ticker').sum().reset_index().to_csv(index=False),
+        data=holdings_df[['ticker', 'quantity', 'cost_basis', 'current_value']].groupby('ticker').sum().reset_index().to_csv(index=False),
         file_name='portfolio.csv',
     )
     st.expander('Show Holdings', expanded=False).dataframe(holdings_df)
