@@ -99,15 +99,25 @@ if holdings_df is not None and not holdings_df.empty:
         pie_col.plotly_chart(pie_fig)
 
     with chart_tab:
-        a, b, c = st.columns(3)
+        a, b = st.columns(2)
         with a:
             y_axis = st.selectbox('Y-Axis', ['account_name', 'asset_class', 'ticker'], index=0)
         with b:
             color_by = st.selectbox('Color By', ['account_name', 'asset_class', 'ticker'], index=2)
+        c, d, e = st.columns(3)
         with c:
             all_tickers = sorted(list(holdings_df['ticker'].unique()))
             incl_tickers = st.multiselect('Only these Tickers', all_tickers)
-        chart_df = holdings_df[holdings_df['ticker'].isin(incl_tickers)] if incl_tickers else holdings_df
+        with d:
+            all_asset_classes = sorted(list(holdings_df['asset_class'].unique()))
+            incl_asset_classes = st.multiselect('Only these Asset Classes', all_asset_classes)
+        with e:
+            all_accounts = sorted(str(s) for s in set(holdings_df['account_name']))
+            incl_accounts = st.multiselect('Only these Accounts', all_accounts)
+        ticker_filter = holdings_df['ticker'].isin(incl_tickers) | bool(not incl_tickers)
+        asset_class_filter = holdings_df['asset_class'].isin(incl_asset_classes) | bool(not incl_asset_classes)
+        account_filter = holdings_df['account_name'].isin(incl_accounts) | bool(not incl_accounts)
+        chart_df = holdings_df[ticker_filter & asset_class_filter & account_filter]
         agg_df = chart_df[[y_axis, color_by] + ['quantity', 'cost_basis', 'current_value']].groupby([y_axis, color_by]).sum().sort_values(by='current_value').reset_index()
         fig = px.bar(
             agg_df,
