@@ -118,44 +118,46 @@ asset_classes << AssetClass('EM Equities')
 asset_classes << AssetClass('US Bonds')
 asset_classes << AssetClass('Short-Term')
 asset_classes << AssetClass('US Real Estate')
+asset_classes << AssetClass('Alternatives')
 
-asset_classes >> 'US Equities' << AssetClass('ITOT')
-asset_classes >> 'US Equities' << AssetClass('AVUV')
-asset_classes >> 'US Equities' << AssetClass('QQQM')
-asset_classes >> 'US Equities' << AssetClass('COWZ')
-asset_classes >> 'US Equities' << AssetClass('SCHD')
-asset_classes >> 'US Equities' << AssetClass('QQQJ')
-asset_classes >> 'US Equities' << AssetClass('SPGP')
-asset_classes >> 'US Equities' << AssetClass('OMFL')
+mapping = {
+    'US Equities': [
+        'ITOT', 'AVUV', 'QQQM', 'QQQJ', 'COWZ', 'SCHD', 'OMFL',
+        'AAPL', 'ABNB', 'ADBE', 'AMZN', 'AMD', 'BRKB', 'CELH',
+        'CRM', 'GOOG', 'GOOGL', 'KVUE', 'META', 'MNST', 'MSFT',
+        'NET', 'NVDA', 'RXRX', 'SOXX', 'TEAM', 'TSLA', 'TTD'
+    ],
+    'Intl Equities': [
+        'VEA', 'DXJ', 'HEFA', 'AVDV', 'DFIV',
+        'ASML', 'SHOP', 'NVO', 'TSM'
+    ],
+    'EM Equities': [
+        'SPEM', 'AVES', 'XCEM',
+    ],
+    'US Bonds': [
+        'VTEB', 'VWIUX', 'VWALX', 'BND', 'FBND', 'JAAA', 'ICLO', 'CD', 'Treasury'
+    ],
+    'Short-Term': [
+        'TFLO', 'FLOT', 'JMST', 'TBIL', 'Money Market'
+    ],
+    'US Real Estate': [
+        'VGSLX', 'AVRE'
+    ],
+    'Alternatives': [
+        'CTA', 'DBMF', 'KMLM',
+    ],
+}
 
-asset_classes >> 'Intl Equities' << AssetClass('VEA')
-asset_classes >> 'Intl Equities' << AssetClass('DXJ')
-asset_classes >> 'Intl Equities' << AssetClass('HEFA')
-asset_classes >> 'Intl Equities' << AssetClass('AVDV')
-asset_classes >> 'Intl Equities' << AssetClass('DFIV')
+for asset_class, tickers in mapping.items():
+    for ticker in tickers:
+        asset_classes >> asset_class << AssetClass(ticker)
 
-asset_classes >> 'EM Equities' << AssetClass('SPEM')
-asset_classes >> 'EM Equities' << AssetClass('AVES')
-asset_classes >> 'EM Equities' << AssetClass('XCEM')
-
-asset_classes >> 'US Bonds' << AssetClass('VTEB')
-asset_classes >> 'US Bonds' << AssetClass('VWIUX')
-asset_classes >> 'US Bonds' << AssetClass('VWALX')
-asset_classes >> 'US Bonds' << AssetClass('BND')
-asset_classes >> 'US Bonds' << AssetClass('FBND')
-asset_classes >> 'US Bonds' << AssetClass('JAAA')
-asset_classes >> 'US Bonds' << AssetClass('CLOA')
-asset_classes >> 'US Bonds' << AssetClass('CD')
-asset_classes >> 'US Bonds' << AssetClass('Treasury')
-
-asset_classes >> 'Short-Term' << AssetClass('TFLO')
-asset_classes >> 'Short-Term' << AssetClass('FLOT')
-asset_classes >> 'Short-Term' << AssetClass('JMST')
-asset_classes >> 'Short-Term' << AssetClass('TBIL')
-asset_classes >> 'Short-Term' << AssetClass('Money Market')
-
-asset_classes >> 'US Real Estate' << AssetClass('VGSLX')
-asset_classes >> 'US Real Estate' << AssetClass('AVRE')
+single_stocks = {
+    'AAPL', 'ABNB', 'ADBE', 'AMZN', 'AMD', 'BRKB', 'CELH',
+    'CRM', 'GOOG', 'GOOGL', 'KVUE', 'META', 'MNST', 'MSFT',
+    'NET', 'NVDA', 'RXRX', 'SOXX', 'TEAM', 'TSLA', 'TTD',
+    'ASML', 'SHOP', 'NVO', 'TSM'
+}
 
 
 def create_global_allocation():
@@ -167,13 +169,12 @@ def create_global_allocation():
     global_allocation << Allocation('US Real Estate', 0.05)
     global_allocation << Allocation('Short-Term', 0.06)
     
-    global_allocation >> 'US Equities' << Allocation('ITOT', 0.4)
+    global_allocation >> 'US Equities' << Allocation('ITOT', 0.44)
     global_allocation >> 'US Equities' << Allocation('AVUV', 0.18)
     global_allocation >> 'US Equities' << Allocation('QQQM', 0.18)
     global_allocation >> 'US Equities' << Allocation('COWZ', 0.08)
-    global_allocation >> 'US Equities' << Allocation('SCHD', 0.08)
-    global_allocation >> 'US Equities' << Allocation('SPGP', 0.04)
-    global_allocation >> 'US Equities' << Allocation('OMFL', 0.04)
+    global_allocation >> 'US Equities' << Allocation('SCHD', 0.04)
+    global_allocation >> 'US Equities' << Allocation('OMFL', 0.08)
     global_allocation >> 'US Equities' << Allocation('QQQJ', 0)
         
     global_allocation >> 'Intl Equities' << Allocation('VEA', 0.45)
@@ -189,7 +190,9 @@ def create_global_allocation():
     global_allocation >> 'US Bonds' << Allocation('VTEB', 0.42)
     global_allocation >> 'US Bonds' << Allocation('VWIUX', 0.22)
     global_allocation >> 'US Bonds' << Allocation('VWALX', 0.11)
-    global_allocation >> 'US Bonds' << Allocation('Treasury', 0.15)
+    global_allocation >> 'US Bonds' << Allocation('JAAA', 0.01)
+    global_allocation >> 'US Bonds' << Allocation('ICLO', 0.01)
+    global_allocation >> 'US Bonds' << Allocation('Treasury', 0.13)
     global_allocation >> 'US Bonds' << Allocation('CD', 0.1)
 
     global_allocation >> 'Short-Term' << Allocation('TFLO', 0.5)

@@ -354,7 +354,7 @@ soupsieve==2.4.1
     # via beautifulsoup4
 stack-data==0.6.2
     # via ipython
-streamlit==1.24.1
+streamlit==1.26.0
     # via -r requirements.in
 tenacity==8.2.2
     # via

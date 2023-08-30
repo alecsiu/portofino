@@ -146,8 +146,7 @@ if holdings_df is not None and not holdings_df.empty:
 
     st.download_button(
         'Download aggregated holdings as CSV',
-        data=holdings_df[['ticker', 'quantity', 'cost_basis', 'current_value']].groupby('ticker').sum().reset_index().to_csv(index=False),
+        data=holdings_df[['account_name', 'asset_class', 'ticker', 'quantity', 'cost_basis', 'current_value']].groupby(['account_name', 'asset_class', 'ticker']).sum().reset_index().to_csv(index=False),
         file_name='portfolio.csv',
     )
     st.expander('Show Holdings', expanded=False).dataframe(holdings_df)
-
