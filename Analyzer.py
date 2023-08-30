@@ -123,7 +123,8 @@ with chart_tab:
     asset_class_filter = holdings_df['asset_class'].isin(incl_asset_classes) | bool(not incl_asset_classes)
     account_filter = holdings_df['account_name'].isin(incl_accounts) | bool(not incl_accounts)
     chart_df = holdings_df[ticker_filter & asset_class_filter & account_filter]
-    agg_df = chart_df[[y_axis, color_by] + ['quantity', 'cost_basis', 'current_value']].groupby([y_axis, color_by]).sum().sort_values(by='current_value').reset_index()
+    grouper = list(set([y_axis, color_by]))
+    agg_df = chart_df[grouper + ['quantity', 'cost_basis', 'current_value']].groupby(grouper).sum().reset_index()
     fig = px.bar(
         agg_df,
         x='current_value', 
@@ -132,8 +133,10 @@ with chart_tab:
         text_auto='.2s', 
         title=f'{y_axis} by {color_by}',
     )
-    fig.update_layout(xaxis=dict(tickformat='$,d', fixedrange=True))
-    fig.update_xaxes(fixedrange=True)
+    fig.update_layout(
+        xaxis=dict(tickformat='$,d', fixedrange=True),
+        yaxis={'categoryorder':'total ascending'},
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 st.download_button(
