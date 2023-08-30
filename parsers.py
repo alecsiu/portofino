@@ -145,7 +145,7 @@ class VanguardParser(Parser):
         )
 
         # Insert dummy values for expected columns
-        holdings_df['account_name'] = holdings_df['account_number'].apply(lambda n: f'#{n}')
+        holdings_df['account_name'] = holdings_df['account_number'].apply(lambda n: f'Vanguard #{n}')
         holdings_df['cost_basis'] = None
         holdings_df['cost_basis_per_share'] = None
         holdings_df['yield'] = None
