@@ -73,7 +73,7 @@ with summary_tab:
     summary_cols[4].metric('Money Market', f'${holdings_df[holdings_df["security_type"] == "Money Market"]["current_value"].sum():,.0f}')
     summary_cols[5].metric('Cash', f'${holdings_df[holdings_df["security_type"] == "Cash"]["current_value"].sum():,.0f}')
 
-    core_only = st.checkbox('Core Portfolio only', value=True)
+    core_only = st.checkbox('Exclude single stocks', value=True)
 
     tree_col, pie_col = st.columns([2, 1])
     asset_class_tree_map = tree_col.empty()
@@ -81,7 +81,7 @@ with summary_tab:
         holdings_df[holdings_df['core']] if core_only else holdings_df,
         path=['asset_class', 'ticker'],
         values='current_value',
-        title='Holdings by Asset Class (Core)' if core_only else 'Holdings by Asset Class',
+        title='Holdings by Asset Class (excl. single stocks)' if core_only else 'Holdings by Asset Class',
         height=600,
     )
     account_fig.update_layout(margin=dict(l=0, r=0, t=40, b=40))
@@ -92,7 +92,7 @@ with summary_tab:
         holdings_df[holdings_df['core']] if core_only else holdings_df,
         values='current_value',
         names='asset_class',
-        title='Asset Allocation (Core)' if core_only else 'Asset Allocation',
+        title='Asset Allocation (excl. single stocks)' if core_only else 'Asset Allocation',
     )
     pie_fig.update_layout(legend=dict(
         yanchor="top",
@@ -119,25 +119,44 @@ with chart_tab:
     with e:
         all_accounts = sorted(str(s) for s in set(holdings_df['account_name']))
         incl_accounts = st.multiselect('Only these Accounts', all_accounts)
+    excl_single_stocks = st.checkbox('Excl. single stocks', value=True)
+    single_stock_filter = ~holdings_df['ticker'].isin(single_stocks) | bool(not excl_single_stocks)
     ticker_filter = holdings_df['ticker'].isin(incl_tickers) | bool(not incl_tickers)
     asset_class_filter = holdings_df['asset_class'].isin(incl_asset_classes) | bool(not incl_asset_classes)
-    account_filter = holdings_df['account_name'].isin(incl_accounts) | bool(not incl_accounts)
-    chart_df = holdings_df[ticker_filter & asset_class_filter & account_filter]
+    account_filter = holdings_df['account_name'].isin(incl_accounts) | bool(not incl_accounts)    
+    chart_df = holdings_df[single_stock_filter & ticker_filter & asset_class_filter & account_filter]
     grouper = list(set([y_axis, color_by]))
     agg_df = chart_df[grouper + ['quantity', 'cost_basis', 'current_value']].groupby(grouper).sum().reset_index()
+
+    # bar_col, pie_col = st.columns([2, 1])
     fig = px.bar(
         agg_df,
         x='current_value', 
         y=y_axis, 
         color=color_by, 
         text_auto='.2s', 
-        title=f'{y_axis} by {color_by}',
+        title=f'Per {y_axis}, broken out by {color_by}',
     )
     fig.update_layout(
         xaxis=dict(tickformat='$,d', fixedrange=True),
         yaxis={'categoryorder':'total ascending'},
+        margin=dict(l=0, r=0, t=40, b=40)
     )
     st.plotly_chart(fig, use_container_width=True)
+    color_fig = px.pie(
+        agg_df,
+        values='current_value',
+        names=color_by,
+        title=f'Aggregated by {color_by}',
+    )
+    color_fig.update_layout(legend=dict(
+        yanchor="top",
+        y=0.99,
+        xanchor="left",
+        x=0.01
+    ))
+    color_fig.update_layout(margin=dict(l=0, r=0, t=40, b=40))
+    st.plotly_chart(color_fig, use_container_width=True)
 
 st.download_button(
     'Download aggregated holdings as CSV',
