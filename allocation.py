@@ -122,7 +122,7 @@ asset_classes << AssetClass('Alternatives')
 
 mapping = {
     'US Equities': [
-        'ITOT', 'AVUV', 'QQQM', 'QQQJ', 'COWZ', 'SCHD', 'OMFL',
+        'FXAIX', 'ITOT', 'AVUV', 'QQQM', 'QQQJ', 'COWZ', 'SCHD', 'OMFL',
         'AAPL', 'ABNB', 'ADBE', 'AMZN', 'AMD', 'BRKB', 'CELH',
         'CRM', 'GOOG', 'GOOGL', 'KVUE', 'META', 'MNST', 'MSFT',
         'NET', 'NVDA', 'RXRX', 'SOXX', 'TEAM', 'TSLA', 'TTD'
@@ -135,10 +135,10 @@ mapping = {
         'SPEM', 'AVES', 'XCEM',
     ],
     'US Bonds': [
-        'VTEB', 'VWIUX', 'VWALX', 'BND', 'FBND', 'JAAA', 'ICLO', 'CD', 'Treasury'
+        'PFXF', 'VTEB', 'VWIUX', 'VWALX', 'BND', 'FBND', 'JAAA', 'ICLO', 'CD', 'Treasury'
     ],
     'Short-Term': [
-        'TFLO', 'FLOT', 'JMST', 'TBIL', 'Money Market'
+        'TFLO', 'FLOT', 'JMST', 'TBIL', 'Money Market', 'VMSXX'
     ],
     'US Real Estate': [
         'VGSLX', 'AVRE'
@@ -155,7 +155,7 @@ for asset_class, tickers in mapping.items():
 single_stocks = {
     'AAPL', 'ABNB', 'ADBE', 'AMZN', 'AMD', 'BRKB', 'CELH',
     'CRM', 'GOOG', 'GOOGL', 'KVUE', 'META', 'MNST', 'MSFT',
-    'NET', 'NVDA', 'RXRX', 'SOXX', 'TEAM', 'TSLA', 'TTD',
+    'NET', 'NVDA', 'QABSY', 'RXRX', 'SOXX', 'TEAM', 'TSLA', 'TTD',
     'ASML', 'SHOP', 'NVO', 'TSM'
 }
 

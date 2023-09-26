@@ -5,6 +5,10 @@ import pandas as pd
 from datetime import datetime
 
 
+def dollar_to_float(s):
+    return float(str(s).replace('$', ''))
+
+
 class Parser:
 
     def parse_csv(self, f):
@@ -86,11 +90,25 @@ class FidelityParser(Parser):
         # Convert $ values into floats
         try:
             for col in ['cost_basis', 'cost_basis_per_share']:
-                holdings_df[col] = holdings_df[col].apply(lambda v: float(str(v).replace('$', '') if v != '--' else 0))
+                holdings_df[col] = holdings_df[col].apply(lambda v: dollar_to_float(v) if v != '--' else 0)
         except Exception:
             print('Error parsing csv')
             raise
 
+        # Fix current value for Money Market
+        holdings_df['quantity'] = holdings_df.apply(
+            lambda r: dollar_to_float(r['Current Value']) if 'MONEY MARKET' in r['description'] else r['quantity'],
+            axis=1,
+        )
+        holdings_df['cost_basis'] = holdings_df.apply(
+            lambda r: dollar_to_float(r['Current Value']) if 'MONEY MARKET' in r['description'] else r['cost_basis'],
+            axis=1,
+        )
+        holdings_df['cost_basis_per_share'] = holdings_df.apply(
+            lambda r: 1.0 if 'MONEY MARKET' in r['description'] else r['cost_basis_per_share'],
+            axis=1,
+        )
+        
         # Remove any '**' suffix from tickers
         holdings_df['ticker'] = holdings_df['ticker'].apply(lambda t: t.replace('**', ''))
 

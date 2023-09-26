@@ -14,7 +14,7 @@ from parsers import FidelityParser, SchwabParser, VanguardParser
 st.set_page_config(page_title='Asset Analyzer', page_icon='📊', layout='wide')
 
 def upload_holdings(st_, parser):
-    holdings_csv = st_.file_uploader('Upload CSV', type=['csv'], key=parser.brokerage)
+    holdings_csv = st_.file_uploader(f'Upload {parser.brokerage} CSV', type=['csv'], key=parser.brokerage)
     if holdings_csv:
         holdings_f = StringIO(holdings_csv.getvalue().decode('utf-8'))        
         holdings_df = parser.parse_csv(holdings_f)
@@ -22,26 +22,47 @@ def upload_holdings(st_, parser):
     else:
         return pd.DataFrame()  # empty
 
+# holdings_df = None
 
-holdings_df = None
-tabs = st.tabs(['Fidelity', 'Schwab', 'Vanguard', 'Asset Analyzer README'])
-holdings_df = pd.concat([
-    upload_holdings(tabs[0], FidelityParser()),
-    upload_holdings(tabs[1], SchwabParser()),
-    upload_holdings(tabs[2], VanguardParser()),
-])
-tabs[3].markdown(
+upload_tab, summary_tab, chart_tab = st.tabs(['Upload', 'Summary', 'Charts'])
+upload_tab.markdown(
 """
 Upload CSV files from Fidelity, Schwab and Vanguard to analyze your portfolio.
 """)
+holdings_df = pd.concat([
+    upload_holdings(upload_tab, FidelityParser()),
+    upload_holdings(upload_tab, VanguardParser())
+])
+
+# holdings_df = pd.concat([
+#     upload_holdings(st.sidebar, FidelityParser()),
+#     upload_holdings(st.sidebar, VanguardParser())
+# ])
+
+# tabs = st.tabs(['Fidelity', 'Schwab', 'Vanguard', 'Asset Analyzer README'])
+# holdings_df = pd.concat([
+#     upload_holdings(tabs[0], FidelityParser()),
+#     upload_holdings(tabs[1], SchwabParser()),
+#     upload_holdings(tabs[2], VanguardParser()),
+# ])
+# tabs[3].markdown(
+# """
+# Upload CSV files from Fidelity, Schwab and Vanguard to analyze your portfolio.
+# """)
 
 if holdings_df is None or holdings_df.empty:
+    for tab in [summary_tab, chart_tab]:
+        tab.write('No data to display. Go to the Upload tab to upload some data.')
     st.stop()
+
+@st.cache_data(ttl=600)  # 10 minutes
+def cached_ticker_data(tickers):
+    return yf.download_ticker_data(tickers, period='5d')
 
 all_tickers = list(holdings_df[holdings_df['security_type'] == 'Security']['ticker'].unique())
 try:
     with st.spinner('Downloading ticker data...'):
-        ticker_df = yf.download_ticker_data(all_tickers, period='5d')
+        ticker_df = cached_ticker_data(all_tickers)
 except Exception as e:
     st.error(e)
     st.dataframe(holdings_df)
@@ -63,7 +84,7 @@ def get_asset_class(ticker):
 holdings_df['asset_class'] = holdings_df['ticker'].apply(get_asset_class)
 holdings_df['core'] = ~holdings_df['ticker'].isin(single_stocks)
 
-summary_tab, chart_tab = st.tabs(['Summary', 'Charts'])
+# summary_tab, chart_tab = st.tabs(['Summary', 'Charts'])
 with summary_tab:
     summary_cols = st.columns(6)
     summary_cols[0].metric('Total Portfolio', f'${holdings_df["current_value"].sum():,.0f}')
