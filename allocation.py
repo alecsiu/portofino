@@ -138,7 +138,7 @@ mapping = {
         'PFXF', 'VTEB', 'VWIUX', 'VWALX', 'BND', 'FBND', 'JAAA', 'ICLO', 'CD', 'Treasury'
     ],
     'Short-Term': [
-        'TFLO', 'FLOT', 'JMST', 'TBIL', 'Money Market', 'VMSXX'
+        'TFLO', 'FLOT', 'JMST', 'TBIL', 'Money Market', 'VMSXX', 'FZEXX',
     ],
     'US Real Estate': [
         'VGSLX', 'AVRE'
