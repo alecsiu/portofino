@@ -95,17 +95,20 @@ class FidelityParser(Parser):
             print('Error parsing csv')
             raise
 
+        def is_money_market(description):
+            return 'MONEY MARKET' in description or 'MMKT' in description
+
         # Fix current value for Money Market
         holdings_df['quantity'] = holdings_df.apply(
-            lambda r: dollar_to_float(r['Current Value']) if 'MONEY MARKET' in r['description'] else r['quantity'],
+            lambda r: dollar_to_float(r['Current Value']) if is_money_market(r['description']) else r['quantity'],
             axis=1,
         )
         holdings_df['cost_basis'] = holdings_df.apply(
-            lambda r: dollar_to_float(r['Current Value']) if 'MONEY MARKET' in r['description'] else r['cost_basis'],
+            lambda r: dollar_to_float(r['Current Value']) if is_money_market(r['description']) else r['cost_basis'],
             axis=1,
         )
         holdings_df['cost_basis_per_share'] = holdings_df.apply(
-            lambda r: 1.0 if 'MONEY MARKET' in r['description'] else r['cost_basis_per_share'],
+            lambda r: 1.0 if is_money_market(r['description']) else r['cost_basis_per_share'],
             axis=1,
         )
         
