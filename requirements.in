@@ -1,7 +1,10 @@
 jupyter
+langchain
+openai
 plotly
 pyparsing
 python-dotenv
 requests-cache
 streamlit
+tabulate
 yfinance
