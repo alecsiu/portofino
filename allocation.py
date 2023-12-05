@@ -135,7 +135,7 @@ mapping = {
         'SPEM', 'AVES', 'XCEM',
     ],
     'US Bonds': [
-        'PFXF', 'VTEB', 'VWIUX', 'VWALX', 'BND', 'FBND', 'JAAA', 'JBBB', 'ICLO', 'CD', 'Treasury'
+        'PFXF', 'VTEB', 'VWIUX', 'VWALX', 'BND', 'FBND', 'MTBA', 'JAAA', 'JBBB', 'ICLO', 'CD', 'Treasury'
     ],
     'Short-Term': [
         'TFLO', 'FLOT', 'JMST', 'TBIL', 'Money Market', 'VMSXX', 'FZEXX',
