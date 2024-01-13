@@ -125,7 +125,7 @@ mapping = {
         'FXAIX', 'ITOT', 'AVUV', 'QQQM', 'QQQJ', 'COWZ', 'SCHD', 'OMFL',
         'AAPL', 'ABNB', 'ADBE', 'AMZN', 'AMD', 'BRKB', 'CELH',
         'CRM', 'GOOG', 'GOOGL', 'KVUE', 'META', 'MNST', 'MSFT',
-        'NET', 'NVDA', 'RXRX', 'SOXX', 'TEAM', 'TSLA', 'TTD'
+        'NET', 'NVDA', 'RXRX', 'SNOW', 'SOXX', 'TEAM', 'TSLA', 'TTD'
     ],
     'Intl Equities': [
         'VEA', 'DXJ', 'HEFA', 'AVDV', 'DFIV',
@@ -135,7 +135,7 @@ mapping = {
         'SPEM', 'AVES', 'XCEM',
     ],
     'US Bonds': [
-        'PFXF', 'VTEB', 'VWIUX', 'VWALX', 'BND', 'FBND', 'MTBA', 'JAAA', 'JBBB', 'ICLO', 'CD', 'Treasury', 'JMUB'
+        'PFXF', 'VTEB', 'VWIUX', 'VWALX', 'BND', 'FBND', 'MTBA', 'JAAA', 'JBBB', 'ICLO', 'CD', 'Treasury', 'JMUB', 'BINC'
     ],
     'Short-Term': [
         'TFLO', 'FLOT', 'JMST', 'TBIL', 'Money Market', 'VMSXX', 'FZEXX',
